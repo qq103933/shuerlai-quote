@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>漯河舒尔莱 — 芯体材料报价计算器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #f0f2f5;
+            color: #1a1a1a;
+            line-height: 1.6;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: white;
+            padding: 24px 16px;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.5px; }
+        .header p { font-size: 0.75rem; opacity: 0.9; margin-top: 4px; }
+        .container { padding: 12px; max-width: 600px; margin: 0 auto; }
+
+        /* 产品参数卡片 - 蓝色系 */
+        .card-product {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(30,58,138,0.08);
+            border: 1px solid #bfdbfe;
+            border-top: 4px solid #2563eb;
+        }
+        .card-product .card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #dbeafe;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-product .card-title::before {
+            content: "📐";
+            font-size: 1.1rem;
+        }
+        .card-product .form-group label {
+            font-size: 0.8rem;
+            color: #1e40af;
+            font-weight: 600;
+            background: #dbeafe;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+        .card-product .form-group input {
+            padding: 11px 12px;
+            border: 2px solid #bfdbfe;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #1e3a8a;
+            background: #ffffff;
+            width: 100%;
+            font-weight: 600;
+        }
+        .card-product .form-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+        }
+
+        /* 价格参数卡片 - 绿色系 */
+        .card-price {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(5,150,105,0.08);
+            border: 1px solid #bbf7d0;
+            border-top: 4px solid #059669;
+        }
+        .card-price .card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #d1fae5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-price .card-title::before {
+            content: "💰";
+            font-size: 1.1rem;
+        }
+        .card-price .form-group label {
+            font-size: 0.8rem;
+            color: #047857;
+            font-weight: 600;
+            background: #d1fae5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+        .card-price .form-group input {
+            padding: 11px 12px;
+            border: 2px solid #bbf7d0;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #065f46;
+            background: #ffffff;
+            width: 100%;
+            font-weight: 600;
+        }
+        .card-price .form-group input:focus {
+            outline: none;
+            border-color: #059669;
+            box-shadow: 0 0 0 4px rgba(5,150,105,0.1);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .form-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+        }
+        .btn-calc {
+            flex: 2;
+            padding: 16px;
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(5,150,105,0.25);
+            transition: transform 0.15s;
+        }
+        .btn-calc:active { transform: scale(0.97); }
+        .btn-reset {
+            flex: 1;
+            padding: 16px;
+            background: #f3f4f6;
+            color: #374151;
+            border: 2px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-reset:active { background: #e5e7eb; }
+
+        .result-area {
+            display: none;
+            margin-top: 10px;
+        }
+        .result-area.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-box {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #059669;
+        }
+        .result-main {
+            text-align: center;
+            padding: 14px 0;
+            border-bottom: 2px dashed #e5e7eb;
+            margin-bottom: 14px;
+        }
+        .result-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .result-value {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #059669;
+        }
+        .result-unit {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .detail-item {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 10px 10px;
+            text-align: center;
+            border: 1px solid #f3f4f6;
+        }
+        .detail-item .label {
+            font-size: 0.7rem;
+            color: #9ca3af;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .detail-item .value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #374151;
+        }
+        .detail-item.profit {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 1px solid #bbf7d0;
+        }
+        .detail-item.profit .value {
+            color: #047857;
+        }
+        .formula-box {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-top: 12px;
+            font-size: 0.78rem;
+            color: #64748b;
+            line-height: 1.9;
+            border: 1px solid #e2e8f0;
+        }
+        .formula-box b { color: #334155; }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>漯河舒尔莱纸品有限公司</h1>
+        <p>芯体材料报价计算器（元/公斤）</p>
+    </div>
+
+    <div class="container">
+        <!-- 产品参数 - 蓝色系 -->
+        <div class="card-product">
+            <div class="card-title">产品参数（必填）</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>总克重 (g/m²)</label>
+                    <input type="number" id="totalGsm" value="185" placeholder="如: 185">
+                </div>
+                <div class="form-group">
+                    <label>SAP占比 (%)</label>
+                    <input type="number" id="sapRatio" value="70" placeholder="如: 70">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>芯体长度 (mm)</label>
+                    <input type="number" id="pieceLength" value="220" placeholder="如: 220">
+                </div>
+                <div class="form-group">
+                    <label>芯体宽度 (mm)</label>
+                    <input type="number" id="pieceWidth" value="65" placeholder="如: 65">
+                </div>
+            </div>
+        </div>
+
+        <!-- 价格参数 - 绿色系 -->
+        <div class="card-price">
+            <div class="card-title">价格参数（默认即可）</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>SAP单价 (元/吨)</label>
+                    <input type="number" id="priceSap" value="19500">
+                </div>
+                <div class="form-group">
+                    <label>卫生纸单价 (元/吨)</label>
+                    <input type="number" id="priceTissue" value="10500">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>绒毛浆单价 (元/吨)</label>
+                    <input type="number" id="priceFluff" value="8500">
+                </div>
+                <div class="form-group">
+                    <label>加工费 (元/吨)</label>
+                    <input type="number" id="processingFee" value="1500">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>运费 (元/吨)</label>
+                    <input type="number" id="freightFee" value="500">
+                </div>
+                <div class="form-group">
+                    <label>成品率 (%)</label>
+                    <input type="number" id="yieldRate" value="95">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>利润率 (%)</label>
+                    <input type="number" id="profitRate" value="15">
+                </div>
+                <div class="form-group">
+                    <label>SAP吸水倍率 (mL/g)</label>
+                    <input type="number" id="sapCapacity" value="300">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>上层纸 (g/m²)</label>
+                    <input type="number" id="tissueTop" value="18">
+                </div>
+                <div class="form-group">
+                    <label>下层纸 (g/m²)</label>
+                    <input type="number" id="tissueBottom" value="14.5">
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-calc" onclick="calculate()">💰 计算报价</button>
+            <button class="btn-reset" onclick="recalculate()">🔄 重新计算</button>
+        </div>
+
+        <div class="result-area" id="resultArea">
+            <div class="result-box">
+                <div class="result-main">
+                    <div class="result-label">公斤报价</div>
+                    <div class="result-value" id="quoteKg">0.0</div>
+                    <div class="result-unit">元/公斤</div>
+                </div>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="label">单片价格</div>
+                        <div class="value" id="quotePiece">0.0000</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">每片克重</div>
+                        <div class="value" id="weightPiece">0.00</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">单片吸水量</div>
+                        <div class="value" id="waterPiece">0</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">每吨可做</div>
+                        <div class="value" id="piecesPerTon">0</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">原材料成本</div>
+                        <div class="value" id="costMaterial">0</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">加工费</div>
+                        <div class="value" id="showProcessing">0</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">运费</div>
+                        <div class="value" id="showFreight">0</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">总成本</div>
+                        <div class="value" id="costTotal">0</div>
+                    </div>
+                    <div class="detail-item profit">
+                        <div class="label">每吨利润</div>
+                        <div class="value" id="profitTon">0</div>
+                    </div>
+                    <div class="detail-item profit">
+                        <div class="label">每公斤利润</div>
+                        <div class="value" id="profitKg">0</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">SAP用量</div>
+                        <div class="value" id="sapGsm">0</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">绒毛浆用量</div>
+                        <div class="value" id="fluffGsm">0</div>
+                    </div>
+                </div>
+                <div class="formula-box" id="formulaBox"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">漯河舒尔莱纸品有限公司 · 数据仅供参考</div>
+
+    <script>
+        function getVal(id) {
+            return parseFloat(document.getElementById(id).value) || 0;
+        }
+
+        function calculate() {
+            const totalGsm = getVal('totalGsm');
+            const sapRatioPct = getVal('sapRatio');
+            const pieceLength = getVal('pieceLength');
+            const pieceWidth = getVal('pieceWidth');
+            const priceSap = getVal('priceSap');
+            const priceTissue = getVal('priceTissue');
+            const priceFluff = getVal('priceFluff');
+            const processingFee = getVal('processingFee');
+            const freightFee = getVal('freightFee');
+            const yieldRate = getVal('yieldRate') / 100;
+            const profitRate = getVal('profitRate') / 100;
+            const sapCapacity = getVal('sapCapacity');
+            const tissueTop = getVal('tissueTop');
+            const tissueBottom = getVal('tissueBottom');
+
+            if (totalGsm <= 0 || sapRatioPct <= 0 || pieceLength <= 0 || pieceWidth <= 0) {
+                alert('请填写完整的产品参数');
+                return;
+            }
+
+            const sapRatio = sapRatioPct / 100;
+            const tissueTotal = tissueTop + tissueBottom;
+
+            const sapGsm = totalGsm * sapRatio;
+            const fluffGsm = totalGsm - sapGsm - tissueTotal;
+
+            if (fluffGsm < 0) {
+                alert('SAP占比过高，超过总克重容量（需预留卫生纸克重）');
+                return;
+            }
+
+            const waterPerM2 = sapGsm * sapCapacity;
+            const absorptionRate = waterPerM2 / totalGsm;
+
+            const sapCostRatio = sapGsm / totalGsm;
+            const tissueTopCostRatio = tissueTop / totalGsm;
+            const tissueBottomCostRatio = tissueBottom / totalGsm;
+            const fluffCostRatio = fluffGsm / totalGsm;
+
+            const costMaterialTheory = (sapCostRatio * priceSap) + (tissueTopCostRatio * priceTissue) + (tissueBottomCostRatio * priceTissue) + (fluffCostRatio * priceFluff);
+            const costMaterial = costMaterialTheory / yieldRate;
+            const costTotal = costMaterial + processingFee + freightFee;
+            const profitTon = costTotal * profitRate;
+            const quoteTon = costTotal + profitTon;
+            const quoteKg = quoteTon / 1000;
+            const profitKg = profitTon / 1000;
+
+            const areaM2 = (pieceLength * pieceWidth) / 1000000;
+            const weightPiece = totalGsm * areaM2;
+            const pricePiece = quoteKg * weightPiece / 1000;
+            const waterPiece = sapGsm * areaM2 * sapCapacity;
+            const piecesPerTon = 1000000 / weightPiece;
+
+            document.getElementById('quoteKg').textContent = quoteKg.toFixed(1);
+            document.getElementById('quotePiece').textContent = pricePiece.toFixed(4) + ' 元';
+            document.getElementById('weightPiece').textContent = weightPiece.toFixed(3) + ' g';
+            document.getElementById('waterPiece').textContent = Math.round(waterPiece) + ' mL';
+            document.getElementById('piecesPerTon').textContent = Math.round(piecesPerTon).toLocaleString() + ' 片';
+            document.getElementById('costMaterial').textContent = (costMaterial / 1000).toFixed(1) + ' 元/kg';
+            document.getElementById('showProcessing').textContent = (processingFee / 1000).toFixed(1) + ' 元/kg';
+            document.getElementById('showFreight').textContent = (freightFee / 1000).toFixed(1) + ' 元/kg';
+            document.getElementById('costTotal').textContent = (costTotal / 1000).toFixed(1) + ' 元/kg';
+            document.getElementById('profitTon').textContent = profitTon.toFixed(2) + ' 元';
+            document.getElementById('profitKg').textContent = profitKg.toFixed(2) + ' 元';
+            document.getElementById('sapGsm').textContent = sapGsm.toFixed(2) + ' g/m²';
+            document.getElementById('fluffGsm').textContent = fluffGsm.toFixed(2) + ' g/m²';
+
+            document.getElementById('formulaBox').innerHTML = `
+                <b>计算过程：</b><br>
+                SAP用量 = ${totalGsm} × ${sapRatioPct}% = <b>${sapGsm.toFixed(2)} g/m²</b><br>
+                绒毛浆 = ${totalGsm} - ${sapGsm.toFixed(2)} - ${tissueTotal} = <b>${fluffGsm.toFixed(2)} g/m²</b><br>
+                吸水量 = ${sapGsm.toFixed(2)} × ${sapCapacity} = <b>${waterPerM2.toFixed(0)} mL/m²</b>（${absorptionRate.toFixed(1)}倍）<br>
+                原材料成本 = [(${sapCostRatio.toFixed(4)}×${priceSap}) + (${tissueTopCostRatio.toFixed(4)}×${priceTissue}) + (${tissueBottomCostRatio.toFixed(4)}×${priceTissue}) + (${fluffCostRatio.toFixed(4)}×${priceFluff})] ÷ ${yieldRate} = <b>${(costMaterial/1000).toFixed(1)} 元/kg</b><br>
+                加工费 = <b>${(processingFee/1000).toFixed(1)} 元/kg</b><br>
+                运费 = <b>${(freightFee/1000).toFixed(1)} 元/kg</b><br>
+                总成本 = ${(costMaterial/1000).toFixed(1)} + ${(processingFee/1000).toFixed(1)} + ${(freightFee/1000).toFixed(1)} = <b>${(costTotal/1000).toFixed(1)} 元/kg</b><br>
+                每吨利润 = ${costTotal.toFixed(2)} × ${profitRate*100}% = <b>${profitTon.toFixed(2)} 元/吨</b><br>
+                每公斤利润 = ${profitTon.toFixed(2)} ÷ 1000 = <b>${profitKg.toFixed(2)} 元/kg</b><br>
+                报价 = ${(costTotal/1000).toFixed(1)} + ${profitKg.toFixed(2)} = <b>${quoteKg.toFixed(1)} 元/kg</b><br>
+                单片面积 = ${pieceLength}×${pieceWidth} = ${(pieceLength*pieceWidth).toLocaleString()} mm² = ${areaM2.toFixed(6)} m²<br>
+                每片克重 = ${totalGsm} × ${areaM2.toFixed(6)} = <b>${weightPiece.toFixed(3)} g/片</b><br>
+                单片价格 = ${quoteKg.toFixed(1)} × ${weightPiece.toFixed(4)}g ÷ 1,000 = <b>${pricePiece.toFixed(4)} 元/片</b>
+            `;
+
+            document.getElementById('resultArea').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function recalculate() {
+            calculate();
+        }
+    </script>
+</body>
+</html>
